@@ -11,180 +11,192 @@ interface OrderCardProps {
 
 export function OrderCard({ order }: OrderCardProps) {
   const queryClient = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
-  const [quantity, setQuantity] = useState(1);
-  const [notes, setNotes] = useState('');
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editStatus, setEditStatus] = useState(order.status || 'pending');
 
-  const { mutate: createOrder, isPending } = useMutation({
+  const { mutate: updateOrder, isPending: isUpdating } = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiClient.createOrder(data);
+      const response = await apiClient.updateOrder(order.id, data);
       if (!response.success) {
-        throw new Error(response.error?.message || 'Failed to create order');
+        throw new Error(response.error?.message || 'Failed to update order');
       }
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      setShowForm(false);
-      setQuantity(1);
-      setNotes('');
-      alert('Order created successfully!');
+      setIsEditOpen(false);
     },
     onError: (error: any) => {
       alert(`Error: ${error.message}`);
     },
   });
 
-  const handleCreateOrder = (e: React.FormEvent) => {
+  const { mutate: deleteOrder, isPending: isDeleting } = useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.deleteOrder(order.id);
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to delete order');
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+    onError: (error: any) => {
+      alert(`Error: ${error.message}`);
+    },
+  });
+
+  const handleUpdateStatus = (e: React.FormEvent) => {
     e.preventDefault();
-    createOrder({
-      productId: order.id,
-      quantity,
-      notes: notes || undefined,
-    });
+    updateOrder({ status: editStatus });
   };
 
+  const handleDelete = () => {
+    if (confirm('Are you sure you want to delete this order?')) {
+      deleteOrder();
+    }
+  };
+
+  const statusColors = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    confirmed: 'bg-blue-100 text-blue-800',
+    shipped: 'bg-purple-100 text-purple-800',
+    delivered: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800',
+  };
+
+  const items = Array.isArray(order.items) ? order.items : [];
+  const totalItems = items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
+
   return (
-    <div className="group bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all overflow-hidden border border-gray-100 hover:border-blue-200">
-      {/* Product Image */}
-      <div className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-100 flex items-center justify-center overflow-hidden relative group">
-        {order.image ? (
-          <img
-            src={order.image}
-            alt={order.productName}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-          />
-        ) : (
-          <div className="text-gray-400 text-center">
-            <div className="text-5xl mb-2 group-hover:scale-110 transition-transform">📦</div>
-            <p className="text-sm font-medium">No image available</p>
-          </div>
-        )}
-        {order.status && (
-          <div className="absolute top-3 right-3">
-            <span
-              className={`text-xs px-3 py-1 rounded-full font-bold shadow-md backdrop-blur-sm ${
-                order.status === 'completed'
-                  ? 'bg-green-500 text-white'
-                  : order.status === 'pending'
-                  ? 'bg-yellow-500 text-white'
-                  : 'bg-red-500 text-white'
-              }`}
-            >
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-            </span>
-          </div>
-        )}
-      </div>
-
-      <div className="p-5">
-        {/* Product Info */}
-        <div className="mb-2">
-          <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
-            {order.productName}
-          </h3>
-          <p className="text-sm font-medium text-gray-500">
-            {order.category}
-          </p>
-        </div>
-
-        {order.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {order.description}
-          </p>
-        )}
-
-        <div className="flex justify-between items-end mb-4 pt-3 border-t border-gray-200">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
+        <div className="flex justify-between items-start">
           <div>
-            <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">
-              ${order.price.toFixed(2)}
-            </span>
+            <p className="text-sm opacity-90">Order ID</p>
+            <p className="font-mono text-lg font-bold truncate">{order.id?.substring(0, 12)}...</p>
           </div>
-          <span className="text-xs text-gray-400 font-medium">
-            {new Date(order.createdAt).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: '2-digit'
-            })}
+          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColors[order.status as keyof typeof statusColors] || statusColors.pending}`}>
+            {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
           </span>
         </div>
+      </div>
 
-        {/* Form */}
-        {showForm ? (
-          <form onSubmit={handleCreateOrder} className="space-y-3 mb-4 animate-slide-down">
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
-                Quantity
-              </label>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-bold transition-colors"
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  min="1"
-                  max="999"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-center font-semibold"
-                />
-                <button
-                  type="button"
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-bold transition-colors"
-                >
-                  +
-                </button>
+      {/* Content */}
+      <div className="p-6 space-y-4">
+        {/* Items */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900 mb-2">Items ({totalItems})</h3>
+          <div className="space-y-2 max-h-32 overflow-y-auto">
+            {items.map((item: any, idx: number) => (
+              <div key={idx} className="text-sm bg-gray-50 p-2 rounded flex justify-between">
+                <span className="text-gray-700">{item.productId}</span>
+                <span className="text-gray-600">x{item.quantity} @ ${item.price}</span>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Pricing */}
+        <div className="border-t pt-4 space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Subtotal:</span>
+            <span className="font-medium">${order.subtotal?.toFixed(2) || '0.00'}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Shipping:</span>
+            <span className="font-medium">${order.shippingFee?.toFixed(2) || '0.00'}</span>
+          </div>
+          <div className="flex justify-between text-lg font-bold text-blue-600 pt-2 border-t">
+            <span>Total:</span>
+            <span>${order.total?.toFixed(2) || '0.00'}</span>
+          </div>
+        </div>
+
+        {/* Shipping Address */}
+        {order.shippingAddress && (
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <p className="text-xs font-semibold text-gray-700 mb-2">SHIPPING TO</p>
+            <div className="text-sm text-gray-600 space-y-1">
+              <p className="font-medium text-gray-900">{order.shippingAddress.name}</p>
+              <p>{order.shippingAddress.address}</p>
+              <p>{order.shippingAddress.province} {order.shippingAddress.postalCode}</p>
+              <p>{order.shippingAddress.phone}</p>
             </div>
+          </div>
+        )}
+
+        {/* Notes */}
+        {order.note && (
+          <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+            <p className="text-xs font-semibold text-blue-700 mb-1">NOTE</p>
+            <p className="text-sm text-blue-900">{order.note}</p>
+          </div>
+        )}
+
+        {/* Date */}
+        <div className="text-xs text-gray-500">
+          Created: {new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString()}
+        </div>
+
+        {/* Edit Modal */}
+        {isEditOpen && (
+          <form onSubmit={handleUpdateStatus} className="border-t pt-4 space-y-3">
             <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
-                Notes (Optional)
-              </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any special requests..."
-                rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-gray-50 hover:bg-white transition-all resize-none"
-              />
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Update Status</label>
+              <select
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
             </div>
             <div className="flex gap-2">
               <button
                 type="submit"
-                disabled={isPending}
-                className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg hover:from-green-600 hover:to-green-700 disabled:opacity-50 font-bold transition-all shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
+                disabled={isUpdating}
+                className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
               >
-                {isPending ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Creating...
-                  </span>
-                ) : (
-                  '✓ Confirm Order'
-                )}
+                {isUpdating ? 'Saving...' : 'Save'}
               </button>
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 py-3 rounded-lg font-bold transition-all shadow-md"
+                onClick={() => {
+                  setIsEditOpen(false);
+                  setEditStatus(order.status || 'pending');
+                }}
+                className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 font-medium"
               >
-                ✕ Cancel
+                Cancel
               </button>
             </div>
           </form>
-        ) : (
-          <button
-            onClick={() => setShowForm(true)}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 font-bold transition-all shadow-card hover:shadow-card-hover transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-          >
-            <span>🛒</span>
-            Create Order
-          </button>
+        )}
+
+        {/* Action Buttons */}
+        {!isEditOpen && (
+          <div className="flex gap-2 pt-4 border-t">
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="flex-1 bg-blue-100 text-blue-700 py-2 rounded-lg hover:bg-blue-200 font-medium transition-colors"
+            >
+              ✏️ Edit
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex-1 bg-red-100 text-red-700 py-2 rounded-lg hover:bg-red-200 font-medium disabled:opacity-50 transition-colors"
+            >
+              {isDeleting ? 'Deleting...' : '🗑️ Delete'}
+            </button>
+          </div>
         )}
       </div>
     </div>

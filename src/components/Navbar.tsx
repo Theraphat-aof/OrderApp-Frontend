@@ -26,6 +26,22 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             {isAuthenticated && user ? (
               <>
+                {/* Navigation Links */}
+                <div className="flex items-center gap-6 pr-4 border-r border-gray-300">
+                  <Link
+                    href="/products"
+                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                  >
+                    🛍️ Products
+                  </Link>
+                  <Link
+                    href="/order"
+                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                  >
+                    📦 Orders
+                  </Link>
+                </div>
+
                 <div className="flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
                     {user.fullName?.charAt(0).toUpperCase() || 'U'}

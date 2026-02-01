@@ -237,6 +237,115 @@ class ApiClient {
     }
   }
 
+  async updateOrder(id: string, data: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.client.patch(`/orders/${id}`, data);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deleteOrder(id: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.client.delete(`/orders/${id}`);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  // Product endpoints
+  async getProducts(params?: Record<string, any>): Promise<ApiResponse<any>> {
+    try {
+      const cleanParams = {
+        ...params,
+        limit: params?.limit ? Number(params.limit) : 20,
+        offset: params?.offset ? Number(params.offset) : 0,
+      };
+
+      Object.keys(cleanParams).forEach(
+        (key) => cleanParams[key] === undefined && delete cleanParams[key]
+      );
+
+      const response = await this.client.get('/products', { params: cleanParams });
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async getProductById(id: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.client.get(`/products/${id}`);
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async getProductsByCategory(category: string, limit: number = 20): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.client.get(`/products/category/${category}`, {
+        params: { limit },
+      });
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async createProduct(data: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.client.post('/products', data);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async updateProduct(id: string, data: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.client.patch(`/products/${id}`, data);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async deleteProduct(id: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.client.delete(`/products/${id}`);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
   private handleError(error: any): ApiResponse<any> {
     const axiosError = error as AxiosError;
     const status = axiosError.response?.status || 500;

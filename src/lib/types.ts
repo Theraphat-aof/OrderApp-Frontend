@@ -24,6 +24,7 @@ export interface User {
   email: string;
   fullName: string;
   avatar?: string;
+  role?: 'admin' | 'customer';
 }
 
 export interface TokenPayload {
