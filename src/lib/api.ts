@@ -277,7 +277,7 @@ class ApiClient {
       const response = await this.client.get('/products', { params: cleanParams });
       return {
         success: true,
-        data: response.data.data || response.data,
+        data: response.data.data || response.data, // { data: [...], pagination: {...} }
       };
     } catch (error) {
       return this.handleError(error);
