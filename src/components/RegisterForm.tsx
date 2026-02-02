@@ -2,10 +2,13 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRegister } from '@/hooks/useAuth';
+import { AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 const registerSchema = z
   .object({
@@ -32,11 +35,11 @@ function getPasswordStrength(password: string): number {
   if (/[^a-zA-Z\d]/.test(password)) strength++;
   return strength;
 }
-
 export function RegisterForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+
 
   const {
     register,
@@ -63,10 +66,26 @@ export function RegisterForm() {
       },
       {
         onSuccess: () => {
-          setSuccessMessage(
-            'Registration successful! Redirecting to login...'
-          );
+          Swal.fire({
+            title: 'Registration Successful!',
+            text: 'Your account has been created. Please login to continue.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              router.push('/login');
+            }
+          });
         },
+        onError: (err: any) => {
+           Swal.fire({
+            title: 'Registration Failed',
+            text: err.message || 'Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#d33',
+          });
+        }
       }
     );
   };
@@ -103,7 +122,7 @@ export function RegisterForm() {
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 animate-slide-down">
           <div className="flex items-start gap-3">
-            <span className="text-red-600 text-xl">⚠️</span>
+            <AlertTriangle className="text-red-600 w-5 h-5 flex-shrink-0" />
             <p className="text-red-700 text-sm font-medium">
               {(error as any)?.message || 'Registration failed. Please try again.'}
             </p>
@@ -111,14 +130,7 @@ export function RegisterForm() {
         </div>
       )}
 
-      {successMessage && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 animate-slide-down">
-          <div className="flex items-start gap-3">
-            <span className="text-green-600 text-xl">✅</span>
-            <p className="text-green-700 text-sm font-medium">{successMessage}</p>
-          </div>
-        </div>
-      )}
+
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Full Name */}
@@ -174,9 +186,9 @@ export function RegisterForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-3 text-gray-500 hover:text-gray-700 text-xl transition-colors"
+              className="absolute right-4 top-3 text-gray-500 hover:text-gray-700 transition-colors"
             >
-              {showPassword ? '👁️' : '👁️‍🗨️'}
+              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
             </button>
           </div>
 
@@ -231,9 +243,9 @@ export function RegisterForm() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-4 top-3 text-gray-500 hover:text-gray-700 text-xl transition-colors"
+              className="absolute right-4 top-3 text-gray-500 hover:text-gray-700 transition-colors"
             >
-              {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+              {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
             </button>
           </div>
           {errors.confirmPassword && (

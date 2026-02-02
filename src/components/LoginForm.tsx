@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useLogin } from "@/hooks/useAuth";
+import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -49,7 +50,7 @@ export function LoginForm() {
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 animate-slide-down">
           <div className="flex items-start gap-3">
-            <span className="text-red-600 text-xl">⚠️</span>
+            <AlertTriangle className="text-red-600 w-5 h-5 flex-shrink-0" />
             <p className="text-red-700 text-sm font-medium">
               {(error as any)?.message || "Login failed. Please try again."}
             </p>
@@ -95,9 +96,9 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-3 text-gray-500 hover:text-gray-700 text-xl transition-colors"
+              className="absolute right-4 top-3 text-gray-500 hover:text-gray-700 transition-colors"
             >
-              {showPassword ? "👁️" : "👁️‍🗨️"}
+              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
             </button>
           </div>
           {errors.password && (

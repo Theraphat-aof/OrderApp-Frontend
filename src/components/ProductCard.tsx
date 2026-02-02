@@ -6,6 +6,7 @@ import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/providers/AuthProvider';
 import { useDeleteProduct } from '@/hooks/useProducts';
 import { CartItem } from '@/providers/CartProvider';
+import Swal from 'sweetalert2';
 
 interface Product {
   id: string;
@@ -32,13 +33,32 @@ export function ProductCard({ product, onEdit }: ProductCardProps) {
   const [error, setError] = useState<string>('');
 
   const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      try {
-        await deleteProduct.mutateAsync(product.id);
-      } catch (err: any) {
-        alert(err.message);
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteProduct.mutateAsync(product.id);
+          Swal.fire(
+            'Deleted!',
+            'Product has been deleted.',
+            'success'
+          );
+        } catch (err: any) {
+          Swal.fire({
+            title: 'Error',
+            text: err.message,
+            icon: 'error'
+          });
+        }
       }
-    }
+    });
   };
 
   const handleAddToCart = () => {

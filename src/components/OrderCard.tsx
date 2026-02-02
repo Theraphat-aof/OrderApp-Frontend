@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { Order } from '@/lib/types';
 import { useAuth } from '@/providers/AuthProvider';
+import Swal from 'sweetalert2';
 
 interface OrderCardProps {
   order: Order;
@@ -16,7 +17,7 @@ export function OrderCard({ order }: OrderCardProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editStatus, setEditStatus] = useState(order.status || 'pending');
   
-  const isAdminOrSeller = user?.role === 'admin' || user?.role === 'seller';
+  const isAdminOrSeller = user?.role === 'admin' || (user?.role as string) === 'seller';
   const canCancel = !isAdminOrSeller && (order.status === 'pending' || !order.status);
 
   const { mutate: updateOrder, isPending: isUpdating } = useMutation({
@@ -30,9 +31,20 @@ export function OrderCard({ order }: OrderCardProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       setIsEditOpen(false);
+      Swal.fire({
+        title: 'Updated!',
+        text: 'Order status has been updated.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
     },
     onError: (error: any) => {
-      alert(`Error: ${error.message}`);
+      Swal.fire({
+        title: 'Error',
+        text: error.message,
+        icon: 'error'
+      });
     },
   });
 
@@ -46,9 +58,18 @@ export function OrderCard({ order }: OrderCardProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      Swal.fire(
+        'Deleted!',
+        'Order has been deleted.',
+        'success'
+      );
     },
     onError: (error: any) => {
-      alert(`Error: ${error.message}`);
+      Swal.fire({
+        title: 'Error',
+        text: error.message,
+        icon: 'error'
+      });
     },
   });
 
@@ -58,9 +79,19 @@ export function OrderCard({ order }: OrderCardProps) {
   };
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this order?')) {
-      deleteOrder();
-    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteOrder();
+      }
+    });
   };
 
   const statusColors = {
@@ -192,8 +223,8 @@ export function OrderCard({ order }: OrderCardProps) {
                {isAdminOrSeller && (
                  <>
                    <button
-                    onClick={() => setIsEditOpen(true)}
-                    className="flex-1 lg:w-full bg-blue-50 text-blue-600 text-xs py-2 rounded border border-blue-100 hover:bg-blue-100 font-medium transition-colors"
+                     onClick={() => setIsEditOpen(true)}
+                     className="flex-1 lg:w-full bg-blue-50 text-blue-600 text-xs py-2 rounded border border-blue-100 hover:bg-blue-100 font-medium transition-colors"
                    >
                      Update Status
                    </button>
@@ -210,9 +241,19 @@ export function OrderCard({ order }: OrderCardProps) {
                {!isAdminOrSeller && canCancel && (
                   <button
                     onClick={() => {
-                        if (confirm('Are you sure you want to cancel this order?')) {
-                          updateOrder({ status: 'cancelled' });
-                        }
+                        Swal.fire({
+                          title: 'Cancel Order?',
+                          text: "Are you sure you want to cancel this order?",
+                          icon: 'warning',
+                          showCancelButton: true,
+                          confirmButtonColor: '#d33',
+                          cancelButtonColor: '#3085d6',
+                          confirmButtonText: 'Yes, cancel it!'
+                        }).then((result) => {
+                          if (result.isConfirmed) {
+                            updateOrder({ status: 'cancelled' });
+                          }
+                        });
                       }}
                       disabled={isUpdating}
                       className="w-full bg-red-50 text-red-600 text-xs py-2 rounded border border-red-100 hover:bg-red-100 font-medium transition-colors"

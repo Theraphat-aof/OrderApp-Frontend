@@ -13,8 +13,9 @@ export default function ProtectedLayout({
   const { isLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
+    const hasToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!isLoading && !isAuthenticated && !hasToken) {
+      router.push("/login"); // Only redirect if no token is present
     }
   }, [isLoading, isAuthenticated, router]);
 

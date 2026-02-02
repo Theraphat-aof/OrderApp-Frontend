@@ -423,6 +423,95 @@ Simply follow the updated UI:
 
 ---
 
-**Documentation Version:** 1.0  
+## UI Polish & Icon Standardization (February 2, 2026)
+
+### Overview
+Replaced all emoji icons with `lucide-react` icons to ensure a professional and consistent visual style across the application. Also fixed TypeScript build errors.
+
+### Files Modified
+
+#### 1. `src/components/Navbar.tsx`
+- Replaced 🛍️/📦 emojis with `<ShoppingBag />` and `<Package />`.
+- Fixed syntax error in render return.
+
+#### 2. `src/components/FilterPanel.tsx`
+- Replaced 🔍 with `<Search />`.
+- Replaced active filter emojis with `<Package />` (Category), `<DollarSign />` (Price), `<X />` (Clear).
+
+#### 3. `src/app/page.tsx` (Landing Page)
+- Replaced feature emojis 🛍️/🔒/⚡ with `<ShoppingBag />`, `<ShieldCheck />`, `<Zap />`.
+- Replaced checkmark ✓ with `<Check />` icon.
+
+#### 4. `src/components/LoginForm.tsx` & `src/components/RegisterForm.tsx`
+- Replaced ⚠️/✅ emojis with `<AlertTriangle />` and `<CheckCircle />`.
+- Replaced password toggle emojis 👁️/👁️‍🗨️ with `<Eye />` and `<EyeOff />`.
+
+#### 5. `src/components/OrderCard.tsx`
+- Fixed TypeScript error regarding role comparison logic.
+
+#### 6. `src/app/cart/page.tsx`
+- Fixed unused import `ThailandAddressValue`.
+- Fixed unused `data` parameter in `onSuccess`.
+- Fixed `react-thailand-address-typeahead` import compatibility.
+
+---
+
+## 🔄 Updates - Feb 2026
+
+### 1. File: `src/lib/api.ts` (Critical Auth Fix)
+
+**Context**: Backend was returning unwrapped user object `{ id, email }` while frontend expected `{ data: { user: ... } }`.
+
+```typescript
+// BEFORE:
+async getCurrentUser(): Promise<ApiResponse<User | null>> {
+  // ...
+  return {
+    success: true,
+    data: response.data.data?.user || response.data.data,
+  };
+}
+
+// AFTER:
+async getCurrentUser(): Promise<ApiResponse<User | null>> {
+  try {
+    const response = await this.client.get('/auth/me');
+    
+    // Handle both wrapped and unwrapped responses
+    let userData = response.data;
+    if (response.data.data) {
+      userData = response.data.data.user || response.data.data;
+    }
+
+    return {
+      success: true,
+      data: userData,
+    };
+  } catch (error) {
+    return this.handleError(error);
+  }
+}
+```
+
+### 2. File: `src/providers/AuthProvider.tsx` (Session Stability)
+
+**Context**: Prevent auto-logout when non-401 errors occur (e.g. network glitch).
+
+```typescript
+// BEFORE:
+} catch (error) {
+  apiClient.clearTokens(); // Logged out on ANY error
+}
+
+// AFTER:
+} catch (error) {
+  console.error('Auth check failed:', error);
+  // Only clear tokens if specific 401 logic triggers in interceptor
+}
+```
+
+---
+
+**Documentation Version:** 1.2  
 **Last Updated:** February 2, 2026  
-**Status:** Ready for Review
+**Status:** Stable

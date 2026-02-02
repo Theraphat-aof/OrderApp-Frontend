@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/providers/AuthProvider';
 import { useLogout } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
-import { ShoppingCart, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X, ShoppingBag, Package } from 'lucide-react';
 
 export function Navbar() {
   const { user, isAuthenticated } = useAuth();
@@ -39,15 +39,17 @@ export function Navbar() {
                 <div className="flex items-center gap-6 pr-4 border-r border-gray-300">
                   <Link
                     href="/products"
-                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                    className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
                   >
-                    🛍️ Products
+                    <ShoppingBag size={20} />
+                    Products
                   </Link>
                   <Link
                     href="/order"
-                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                    className="flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
                   >
-                    📦 Orders
+                    <Package size={20} />
+                    Orders
                   </Link>
                 </div>
 
@@ -154,17 +156,19 @@ export function Navbar() {
                 
                 <Link
                   href="/products"
-                  className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
                   onClick={closeMenu}
                 >
-                  🛍️ Products
+                  <ShoppingBag size={20} />
+                  Products
                 </Link>
                 <Link
                   href="/order"
-                  className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition-colors"
                   onClick={closeMenu}
                 >
-                  📦 Orders
+                  <Package size={20} />
+                  Orders
                 </Link>
                 
                 <div className="pt-2">

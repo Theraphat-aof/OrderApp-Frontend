@@ -277,3 +277,28 @@ For issues or questions about the image upload feature:
 2. Verify backend `/products/upload` endpoint is implemented
 3. Check browser console for any errors
 4. Ensure backend response format matches expected format
+
+---
+
+## 🛠️ System Updates (Feb 2026)
+
+### 1. Notification System Overhaul
+Replaced all native browser alerts with `SweetAlert2` for a consistent, professional look.
+
+- **Registration**: Success modal with auto-redirect.
+- **Login**: Styled error alerts.
+- **Cart/Orders**: Confirmation modals for destructive actions.
+
+### 2. Session Stability
+Fixed critical issues causing users to be logged out upon page refresh.
+
+- **Auth Provider**: Now distinguishes between "Network Error" (keep session) and "401 Unauthorized" (logout).
+- **Backend Integration**: Adjusted `api.ts` to correctly parse user data from the backend structure.
+- **Loading States**: Added proper loading blockers to prevent premature redirects.
+
+### 3. Address Management
+Implemented intelligent Thai address auto-completion in the Shopping Cart.
+
+- **Component**: New `AddressForm.tsx` using `react-thailand-address-typeahead`.
+- **Dynamic Loading**: Implemented client-side only loading to resolve Next.js SSR build errors.
+

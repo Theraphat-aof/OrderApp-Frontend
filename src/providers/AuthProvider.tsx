@@ -31,11 +31,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (response.success && response.data) {
           setUser(response.data);
         } else {
-          apiClient.clearTokens();
+          // Only clear tokens if unauthorized (token invalid/expired and refresh failed)
+          // Don't clear on server errors (500) or network errors
+          if (response.error?.status === 401) {
+            console.log('Token invalid, logging out');
+            apiClient.clearTokens();
+          } else {
+            console.error('Failed to get user details:', response.error);
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-        apiClient.clearTokens();
+        // Do not clear tokens on generic errors
+        // apiClient.clearTokens(); 
       } finally {
         setLoading(false);
       }

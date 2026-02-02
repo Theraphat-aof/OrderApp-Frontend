@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
+import Swal from 'sweetalert2';
 
 export function useLogin() {
   const router = useRouter();
@@ -35,7 +36,12 @@ export function useLogin() {
     onError: (error: any) => {
       console.error('💥 Login mutation error:', error.message);
       // Alert error ให้เห็นชัดก่อน redirect/refresh
-      alert(`❌ Login Error:\n\n${error.message}`);
+      Swal.fire({
+        title: 'Login Error',
+        text: error.message,
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
     },
   });
 }

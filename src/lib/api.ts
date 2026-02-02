@@ -41,9 +41,14 @@ class ApiClient {
               return this.client(originalRequest);
             }
           } catch (refreshError) {
+            console.error('Session refresh failed:', refreshError);
             this.clearTokens();
             if (typeof window !== 'undefined') {
-              window.location.href = '/login';
+               // Only redirect if we are sure refresh failed
+               const isLoginPage = window.location.pathname === '/login';
+               if (!isLoginPage) {
+                   window.location.href = '/login';
+               }
             }
             return Promise.reject(refreshError);
           }
@@ -166,10 +171,18 @@ class ApiClient {
   async getCurrentUser(): Promise<ApiResponse<User | null>> {
     try {
       const response = await this.client.get('/auth/me');
-      // Backend wraps response: { success: true, data: { user: ... } }
+      
+      // Handle both wrapped and unwrapped responses
+      // Unwrapped: { id: ..., email: ... }
+      // Wrapped: { data: { user: ... } } or { data: { ... } }
+      let userData = response.data;
+      if (response.data.data) {
+        userData = response.data.data.user || response.data.data;
+      }
+
       return {
         success: true,
-        data: response.data.data?.user || response.data.data,
+        data: userData,
       };
     } catch (error) {
       return this.handleError(error);

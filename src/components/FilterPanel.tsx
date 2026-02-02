@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useFilters } from '@/hooks/useFilters';
+import { Search, Package, DollarSign, X } from 'lucide-react';
 
 const CATEGORIES = [
   'Electronics',
@@ -50,7 +51,7 @@ export function FilterPanel() {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-all text-sm"
             />
-            <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+            <Search className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
           </div>
         </div>
 
@@ -64,7 +65,7 @@ export function FilterPanel() {
             onChange={(e) => setCategory(e.target.value || null)}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-all text-sm font-medium"
           >
-            <option value="">📦 All Categories</option>
+            <option value="">All Categories</option>
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
@@ -139,20 +140,20 @@ export function FilterPanel() {
           <div className="flex flex-wrap gap-2">
             {search && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                🔍 {search}
-                <button onClick={() => setSearch('')} className="ml-1.5 text-blue-500 hover:text-blue-700 font-bold">×</button>
+                <Search size={12} /> {search}
+                <button onClick={() => setSearch('')} className="ml-1.5 text-blue-500 hover:text-blue-700"><X size={12} /></button>
               </span>
             )}
             {category && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                📦 {category}
-                <button onClick={() => setCategory(null)} className="ml-1.5 text-green-500 hover:text-green-700 font-bold">×</button>
+                <Package size={12} /> {category}
+                <button onClick={() => setCategory(null)} className="ml-1.5 text-green-500 hover:text-green-700"><X size={12} /></button>
               </span>
             )}
             {(minPrice || maxPrice) && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                💰 ${minPrice || '0'} - ${maxPrice || '∞'}
-                <button onClick={() => setPriceRange(null, null)} className="ml-1.5 text-purple-500 hover:text-purple-700 font-bold">×</button>
+                <DollarSign size={12} /> ${minPrice || '0'} - ${maxPrice || '∞'}
+                <button onClick={() => setPriceRange(null, null)} className="ml-1.5 text-purple-500 hover:text-purple-700"><X size={12} /></button>
               </span>
             )}
             <button

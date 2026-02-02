@@ -25,6 +25,9 @@ A modern, full-featured Next.js 14 frontend application for order management and
 
 ### UI/UX
 - ✅ Responsive design (mobile-first approach)
+- ✅ Professional `lucide-react` iconography
+- ✅ Beautiful notifications with `sweetalert2`
+- ✅ Smart Thai Address Auto-complete
 - ✅ Dark mode ready
 - ✅ Skeleton loading states
 - ✅ Error handling and display

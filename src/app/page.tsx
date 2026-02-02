@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ShoppingBag, ShieldCheck, Zap, Check } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -40,8 +41,8 @@ export default function Home() {
             {/* Browse Products */}
             <div className="group bg-white rounded-2xl shadow-card hover:shadow-card-hover p-8 transition-all transform hover:-translate-y-2 duration-300 border border-gray-100 hover:border-blue-200">
               <div className="mb-6 flex justify-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
-                  🛍️
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                  <ShoppingBag size={32} />
                 </div>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Browse Products</h3>
@@ -53,8 +54,8 @@ export default function Home() {
             {/* Secure */}
             <div className="group bg-white rounded-2xl shadow-card hover:shadow-card-hover p-8 transition-all transform hover:-translate-y-2 duration-300 border border-gray-100 hover:border-blue-200">
               <div className="mb-6 flex justify-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
-                  🔒
+                <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                  <ShieldCheck size={32} />
                 </div>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Secure & Safe</h3>
@@ -66,8 +67,8 @@ export default function Home() {
             {/* Fast */}
             <div className="group bg-white rounded-2xl shadow-card hover:shadow-card-hover p-8 transition-all transform hover:-translate-y-2 duration-300 border border-gray-100 hover:border-blue-200">
               <div className="mb-6 flex justify-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform">
-                  ⚡
+                <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl flex items-center justify-center text-yellow-600 group-hover:scale-110 transition-transform">
+                  <Zap size={32} />
                 </div>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Lightning Fast</h3>
@@ -95,8 +96,8 @@ export default function Home() {
                   'Mobile-friendly responsive design',
                 ].map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center text-white font-bold text-sm">
-                      ✓
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center text-white items-center shadow-sm">
+                      <Check size={14} strokeWidth={3} />
                     </span>
                     <span className="text-gray-700 font-medium">{feature}</span>
                   </li>
