@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useFilterStore } from '@/lib/store';
 
 export function useFilters() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const {
     category,
@@ -49,14 +50,14 @@ export function useFilters() {
     if (category) params.set('category', category);
     if (minPrice !== null) params.set('minPrice', minPrice.toString());
     if (maxPrice !== null) params.set('maxPrice', maxPrice.toString());
-    if (sortBy) params.set('sort', sortBy);
+    if (sortBy && sortBy !== 'newest') params.set('sort', sortBy);
     if (page > 1) params.set('page', page.toString());
     if (search) params.set('search', search);
 
     const queryString = params.toString();
-    const href = queryString ? `/order?${queryString}` : '/order';
+    const href = queryString ? `${pathname}?${queryString}` : pathname;
     router.push(href);
-  }, [category, minPrice, maxPrice, sortBy, page, search, router]);
+  }, [category, minPrice, maxPrice, sortBy, page, search, router, pathname]);
 
   return {
     category,

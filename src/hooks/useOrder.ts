@@ -14,12 +14,36 @@ export function useOrders() {
         limit: 12,
         sortBy: sortBy === 'newest' ? 'createdAt' : 'total',
         sortOrder: 'desc',
-        // search param ไม่ support ใน backend ยัง - ใช้ customerId แทนถ้าต้อง
       });
       if (!response.success) {
         throw new Error(response.error?.message || 'Failed to fetch orders');
       }
-      return response.data as OrderListResponse;
+      
+      const rawData = response.data;
+
+      // Handle if response is just an array
+      if (Array.isArray(rawData)) {
+        return {
+          data: rawData,
+          total: rawData.length,
+          page: page,
+          pageSize: 12,
+          hasNextPage: false,
+        } as OrderListResponse;
+      }
+
+      // Map backend response structure to OrderListResponse
+      if (rawData.items) {
+        return {
+          data: rawData.items,
+          total: rawData.total || rawData.items.length,
+          page: rawData.page || page,
+          pageSize: rawData.limit || 12,
+          hasNextPage: rawData.hasNextPage || false,
+        } as OrderListResponse;
+      }
+
+      return rawData as OrderListResponse;
     },
   });
 }

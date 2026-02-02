@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { ApiResponse, User } from './types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7000/api/v1';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -109,15 +109,6 @@ class ApiClient {
         email,
         password,
       });
-      console.log('📨 Raw response.data:', response.data);
-      console.log('📨 Response structure:', {
-        hasData: !!response.data,
-        keys: Object.keys(response.data || {}),
-        value: response.data
-      });
-      
-      // Backend wraps: { success: true, data: { accessToken, refreshToken, user } }
-      // OR: { accessToken, refreshToken, user }
       let tokens: any;
       
       if (response.data.data) {
@@ -131,7 +122,6 @@ class ApiClient {
       }
       
       const { accessToken, refreshToken, user } = tokens;
-      console.log('✅ Extracted tokens - AccessToken:', accessToken?.substring(0, 20) + '...');
       
       this.setTokens(accessToken, refreshToken);
       return {
@@ -190,20 +180,17 @@ class ApiClient {
   async getOrders(params?: Record<string, any>): Promise<ApiResponse<any>> {
     try {
       // Convert string params to correct types
-      const cleanParams = {
+      const cleanParams: Record<string, any> = {
         ...params,
         limit: params?.limit ? Number(params.limit) : undefined,
       };
       
-      // Remove undefined values
       Object.keys(cleanParams).forEach(
         (key) => cleanParams[key] === undefined && delete cleanParams[key]
       );
 
-      console.log('📤 Sending getOrders params:', cleanParams);
       const response = await this.client.get('/orders', { params: cleanParams });
       
-      // Backend wraps: { success: true, data: { items: [...], cursor?: ... } }
       return {
         success: true,
         data: response.data.data || response.data,
@@ -218,7 +205,7 @@ class ApiClient {
       const response = await this.client.post('/orders', data);
       return {
         success: true,
-        data: response.data,
+        data: response.data.data || response.data,
       };
     } catch (error) {
       return this.handleError(error);
@@ -264,7 +251,7 @@ class ApiClient {
   // Product endpoints
   async getProducts(params?: Record<string, any>): Promise<ApiResponse<any>> {
     try {
-      const cleanParams = {
+      const cleanParams: Record<string, any> = {
         ...params,
         limit: params?.limit ? Number(params.limit) : 20,
         offset: params?.offset ? Number(params.offset) : 0,
@@ -337,6 +324,27 @@ class ApiClient {
   async deleteProduct(id: string): Promise<ApiResponse<any>> {
     try {
       const response = await this.client.delete(`/products/${id}`);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+  async uploadProductImage(file: File): Promise<ApiResponse<any>> {
+    try {
+      const formData = new FormData();
+      // Backend FileInterceptor expects 'image' field, not 'file'
+      formData.append('image', file);
+
+      // Use multipart/form-data for file upload
+      const response = await this.client.post('/products/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return {
         success: true,
         data: response.data.data || response.data,

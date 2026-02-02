@@ -9,9 +9,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      console.log('🔐 Attempting login for:', email);
       const response = await apiClient.login(email, password);
-      console.log('📝 Login response:', response);
       
       if (!response.success) {
         const errorMsg = response.error?.message || 'Login failed';
@@ -24,17 +22,14 @@ export function useLogin() {
         }));
         throw new Error(errorMsg);
       }
-      console.log('✅ Login successful, user:', response.data?.user);
       return response.data;
     },
     onSuccess: (data) => {
-      console.log('🎉 Setting user and redirecting to /order:', data);
       setUser(data.user);
       // ลบ error ที่เก็บไว้ถ้า login สำเร็จ
       localStorage.removeItem('lastError');
       setTimeout(() => {
-        console.log('🔄 Redirecting to /order');
-        router.push('/order');
+        router.push('/products');
       }, 1000);
     },
     onError: (error: any) => {
